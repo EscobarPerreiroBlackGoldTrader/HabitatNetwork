@@ -7,6 +7,7 @@ package habitatnetwork;
 
 import java.net.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -25,6 +26,7 @@ public class NetworkClient {
     //private String packet;
     private String otvetServera;
     private TreeMap<String,String> clients;
+    private ArrayList<ClientDescriptor> friendsList;
     //---------------------
     private ClientDescriptor cld;
     private String id,name;
@@ -40,24 +42,33 @@ public class NetworkClient {
     private ObjectInputStream ois;
     
     // обязательно должен быть public, иначе HabitatServer его не видит
-    public class ClientDescriptor implements Serializable{ //класс для обмена с сервером
-
-        private final String master_id,master_name;
-        
-        public ClientDescriptor(String id,String name) {
-            this.master_id = id;
-            this.master_name = name;
-        }
-
-        public String getMaster_id() {
-            return master_id;
-        }
-
-        public String getMaster_name() {
-            return master_name;
-        } 
-    }
-    
+//    public class ClientDescriptor1 implements Serializable{ //класс для обмена с сервером
+//
+//        private String master_id,master_name;
+//        
+//        public ClientDescriptor1(String id,String name) {
+//            this.master_id = id;
+//            this.master_name = name;
+//        }
+//
+//        public String getMaster_id() {
+//            return master_id;
+//        }
+//
+//        public String getMaster_name() {
+//            return master_name;
+//        } 
+//
+//        public void setMaster_id(String master_id) {
+//            this.master_id = master_id;
+//        }
+//
+//        public void setMaster_name(String master_name) {
+//            this.master_name = master_name;
+//        }
+//        
+//    }
+//    
     
     
     
@@ -66,7 +77,8 @@ public class NetworkClient {
         //this.hostname = hostname;
         this.name = name;
         this.id = "client#" + (new Random()).nextLong();
-        this.cld = new NetworkClient.ClientDescriptor(id, this.name);
+        /*this.cld = new NetworkClient.ClientDescriptor1(id, this.name);*/
+        this.cld = new ClientDescriptor(id, name);
         //this.inFromUser = new BufferedReader(new InputStreamReader(/*System.in*/in));
         //in.read(id)
         //this.packet = inFromUser.readLine();
@@ -135,6 +147,37 @@ public class NetworkClient {
         //-----------------
         
         clientSocket.close();
+    }
+    
+    
+    public void test() throws IOException{
+        
+        if(clientSocket == null)
+            clientSocket = new Socket(InetAddress.getLocalHost(), port);
+        
+        if(oos == null)
+            oos = new ObjectOutputStream(clientSocket.getOutputStream());
+        System.out.println("посылаю объект\n");
+        oos.writeObject(cld);
+        oos.flush();
+        //clientSocket.close(); // здесь закрывать нельзя
+        
+        if(ois == null)
+            ois = new ObjectInputStream(clientSocket.getInputStream());
+        try {
+            
+            System.out.println("friendslist = " + 
+                    (friendsList = (ArrayList<ClientDescriptor>)ois.readObject()) );
+            
+        } catch (ClassNotFoundException ex) {
+            System.out.println("ClassNotFoundException при попытке принять friendsList");
+            Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+
+    public ArrayList<ClientDescriptor> getFriendsList() {
+        return friendsList;
     }
     
     
