@@ -178,6 +178,21 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
         ThreadCarManager.setPriority(prior);
     } 
 //==============================================================================
+     synchronized CopyOnWriteArrayList<BaseAI> get_lst_copy() {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        CopyOnWriteArrayList<BaseAI> cp = new CopyOnWriteArrayList<>();
+        for (BaseAI next : lst) {
+            cp.add(next);
+        }
+        return  cp;
+    }
+//==============================================================================
+    synchronized void update_lst(CopyOnWriteArrayList<BaseAI> income_lst) {
+        for(BaseAI item: income_lst){
+            lst.add(item);
+        }
+    }
+//==============================================================================
     private class Updater extends TimerTask /*implements Serializable*/{
         private Habitat m_aplet = null;
         private boolean m_firstRun = true; // первый ли запуск метода run()?

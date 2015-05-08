@@ -18,12 +18,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -148,13 +150,11 @@ public class MainJFrame extends javax.swing.JFrame {
         jComboBox_CarPrior = new javax.swing.JComboBox();
         jLabel7 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea_NetworkView = new javax.swing.JTextArea();
         jButton_RefreshNet = new javax.swing.JButton();
         jProgressBar_Exchange = new javax.swing.JProgressBar();
         jScrollPane5 = new javax.swing.JScrollPane();
         jList_network_friends = new javax.swing.JList();
-        jButton6 = new javax.swing.JButton();
+        jButton_exchange = new javax.swing.JButton();
         jLabel_infopath = new javax.swing.JLabel();
         habitat1 = new habitatnetwork.Habitat();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -490,11 +490,6 @@ public class MainJFrame extends javax.swing.JFrame {
         jPanel5.setMaximumSize(new java.awt.Dimension(50, 200));
         jPanel5.setPreferredSize(new java.awt.Dimension(50, 200));
 
-        jTextArea_NetworkView.setEditable(false);
-        jTextArea_NetworkView.setColumns(20);
-        jTextArea_NetworkView.setRows(5);
-        jScrollPane3.setViewportView(jTextArea_NetworkView);
-
         jButton_RefreshNet.setIcon(new javax.swing.ImageIcon(getClass().getResource("/habitatnetwork/52.png"))); // NOI18N
         jButton_RefreshNet.setToolTipText("обновить список");
         jButton_RefreshNet.addActionListener(new java.awt.event.ActionListener() {
@@ -505,40 +500,38 @@ public class MainJFrame extends javax.swing.JFrame {
 
         jScrollPane5.setViewportView(jList_network_friends);
 
-        jButton6.setText("Обмен");
-        jButton6.setToolTipText("Обменяться объектами");
+        jButton_exchange.setText("Обмен");
+        jButton_exchange.setToolTipText("Обменяться объектами");
+        jButton_exchange.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton_exchangeActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+            .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jProgressBar_Exchange, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane3)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel5Layout.createSequentialGroup()
-                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton_RefreshNet, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addGap(44, 44, 44))
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jButton_exchange)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton_RefreshNet, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jProgressBar_Exchange, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton_RefreshNet)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE))
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButton_RefreshNet, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton_exchange, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jProgressBar_Exchange, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -1081,36 +1074,31 @@ public class MainJFrame extends javax.swing.JFrame {
         
         if(NW_Client == null){
             try {
-                NW_Client = new NetworkClient();
+                NW_Client = new NetworkClient(21285,"localhost",System.in, "Lunohod" /*+ (new Random()).nextInt(10000)*/,habitat1);
                 
             } catch (IOException ex) {
-                System.out.println("нет коннехту, объект нетворкклиент не создан");
+                DefaultListModel model = new DefaultListModel();
+                model.addElement("нет подходящих серверов в обозримом пространстве");
+                jList_network_friends.setModel(model);
+                System.out.println("нет коннехту, объект нетворкклиент не создан " + NW_Client);
             }
             
         }
         
         try {
             //NW_Client.check_svyaz();
-            NW_Client.test();
+            NW_Client.establishConnect();
             
         } catch (IOException ex) {
+            System.out.println("*********************NW_Client*************************");
             Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
-        ArrayList<ClientDescriptor> friendsList = NW_Client.getFriendsList();
         
-        friendsList.stream().forEach((cld) -> {
-            jTextArea_NetworkView.append(cld.getMaster_name()+ '\n');
+        renewFriendsList(NW_Client.getFriendsList()); //обновление отображения в воджете
         
-        DefaultListModel model = new DefaultListModel();
-        model.addElement(cld.getMaster_name() + cld.getMaster_id());
-        ListModel modelL = jList_network_friends.getModel();
-
-        for(int i=0;i<modelL.getSize();i++)
-            model.addElement(modelL.getElementAt(i));
-        jList_network_friends.setModel(model);
         //jList_network_friends.setLayoutOrientation(JList.VERTICAL_WRAP);
         //jList_network_friends.setVisibleRowCount(0);
-        }); //ш-дфдфш-дфдфш
+        //ш-дфдфш-дфдфш
         
     }//GEN-LAST:event_jButton_RefreshNetActionPerformed
 
@@ -1196,6 +1184,20 @@ public class MainJFrame extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jMenuItem_savefileActionPerformed
 
+    private void jButton_exchangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_exchangeActionPerformed
+        // Здесь процедура обмена
+        //получить выбранный в листе элемент
+        String sVal = (String)jList_network_friends.getSelectedValue();
+//        System.out.println(sVal);
+//        System.out.println("**************************\n"+sVal.getClass());
+        
+        NW_Client.exchangeData(sVal);
+        
+        
+        
+        
+    }//GEN-LAST:event_jButton_exchangeActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1259,10 +1261,10 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton_CarSleepAwake;
     private javax.swing.JButton jButton_MotoSleepAwake;
     private javax.swing.JButton jButton_RefreshNet;
+    private javax.swing.JButton jButton_exchange;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JComboBox jComboBox2;
@@ -1305,13 +1307,11 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JTabbedPane jTabbedPane_TabInterface;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextArea jTextArea2;
-    private javax.swing.JTextArea jTextArea_NetworkView;
     // End of variables declaration//GEN-END:variables
 
     
@@ -1415,6 +1415,20 @@ public class MainJFrame extends javax.swing.JFrame {
            }
         }
         return true;
+    }
+
+    private void renewFriendsList(ArrayList<ClientDescriptor> friendsList) {
+        friendsList.stream().forEach((cld) -> {
+            //jTextArea_NetworkView.append(cld.getMaster_name()+ '\n');
+        
+            DefaultListModel model = new DefaultListModel();
+            model.addElement(cld.getMaster_name() + cld.getMaster_id());
+            ListModel modelL = jList_network_friends.getModel();
+
+            for(int i=0;i<modelL.getSize();i++)
+                model.addElement(modelL.getElementAt(i));
+            jList_network_friends.setModel(model);
+        });
     }
 }
 

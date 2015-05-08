@@ -68,7 +68,7 @@ public class CarMan extends Thread{
             
             //**************************************************************
             for(Iterator<BaseAI> it = lst.iterator();it.hasNext();){
-                System.out.println("начинаю искать машину");
+                //System.out.println("начинаю искать машину");
                 if(mother.isPausedCar()){
                     freezeUP = true;
                     try {
@@ -81,7 +81,7 @@ public class CarMan extends Thread{
                 
                a = it.next();
                if(a instanceof Car){
-                   System.out.println("нашёл машину, начинаю двигать");
+                   //System.out.println("нашёл машину, начинаю двигать");
                    x = a.getX();
                    if(x < p_w){
                        a.mooveX();
@@ -89,7 +89,7 @@ public class CarMan extends Thread{
                    }
                    if(x >= p_w)a.setX(0); 
                }
-               System.out.println("закончил одну итерацию поиска машин");
+               //System.out.println("закончил одну итерацию поиска машин");
                     
             }// end of for
             //**************************************************************
@@ -102,7 +102,7 @@ public class CarMan extends Thread{
             }
             Thread.yield();
             mother.repaint();
-            System.out.println("перерисовываю из CarMan");
+            //System.out.println("перерисовываю из CarMan");
         }
     }
     

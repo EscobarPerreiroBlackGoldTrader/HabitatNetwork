@@ -8,10 +8,12 @@ package habitatnetwork;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,24 +22,28 @@ import java.util.logging.Logger;
  * @author iUser
  */
 public class NetworkClient {
-    
-    private int port;
-    //private String hostname;
-    //private String packet;
+    //------------------ необходимая часть для отправки lst по внешнему требованию -----
+    private int wellcome_listen_port; //= 21288; -необходим динамический номер порта
+    //private ServerSocket inbound_wellcome_listener;
+    private ServerPart sp;
+    //----------------------------------------------------------------------------------
+
     private String otvetServera;
     private TreeMap<String,String> clients;
     private ArrayList<ClientDescriptor> friendsList;
     //---------------------
-    private ClientDescriptor cld;
-    private String id,name;
+    private final ClientDescriptor cld;
+    private final String id,name;
+    private final Habitat habitat;
+    private final int port;
     
     //---------------------
     
-    private BufferedReader /*inFromUser,*/ inFromServer;
+   // private BufferedReader /*inFromUser,*/ inFromServer;
     
     private Socket clientSocket;
     
-    private DataOutputStream outToServer;
+    //private DataOutputStream outToServer;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
     
@@ -72,13 +78,12 @@ public class NetworkClient {
     
     
     
-    public NetworkClient(int port,String hostname,InputStream in, String name) throws IOException {
+    public NetworkClient(int port,String hostname,InputStream in, String name,Habitat habitat) throws IOException {
+        this.habitat = habitat;
         this.port = port;
-        //this.hostname = hostname;
         this.name = name;
-        this.id = "client#" + (new Random()).nextLong();
+        this.id = String.valueOf((new Random()).nextLong());
         /*this.cld = new NetworkClient.ClientDescriptor1(id, this.name);*/
-        this.cld = new ClientDescriptor(id, name);
         //this.inFromUser = new BufferedReader(new InputStreamReader(/*System.in*/in));
         //in.read(id)
         //this.packet = inFromUser.readLine();
@@ -99,72 +104,78 @@ public class NetworkClient {
         this.clientSocket = new Socket(InetAddress.getLocalHost(), port);//Socket(this.hostname,this.port);
         //this.outToServer = new DataOutputStream(this.clientSocket.getOutputStream());
         
+        this.sp = new ServerPart(/*wellcome_listen_port,*/habitat); //слушает сеть на предмет входящих попыток обмена lst
+        this.sp.start(); //???
+        this.wellcome_listen_port = this.sp.getWellcomePort(); //узнать на каком порту запустился прослушивальщик(принимающий exchange)
+        this.cld = new ClientDescriptor(id, name,this.wellcome_listen_port);
     }
     
-    public NetworkClient() throws IOException{
-        this(21285,"localhost",System.in, "Lunohod1");
-    }
+//    public NetworkClient() throws IOException{
+//        this(21285,"localhost",System.in, "Lunohod" + (new Random()).nextInt(10000),null);
+//    }
     
     
-    public void check_svyaz() throws IOException{
-        if(clientSocket.isClosed()){
-            //clientSocket.connect(null);
-            clientSocket = new Socket(InetAddress.getLocalHost(), port);
-        }
-        
-        
-        outToServer = new DataOutputStream(clientSocket.getOutputStream());
-        inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        //oos = new ObjectOutputStream(clientSocket.getOutputStream());// для сериализации
-        
-        //--- 1 send ---
-        outToServer.writeBytes(id + '\n'); // + '\n' - обязателно 
-        outToServer.flush();
-        outToServer.writeBytes(name + '\n');
-        outToServer.flush();
-        //oos.writeObject(cld); // послать описатель
-        //--------------
-        
-        //--- 2 recive --
-        try {
-            ois = new ObjectInputStream(clientSocket.getInputStream());
-            
-            clients = (TreeMap<String,String>)ois.readObject();
-        } catch (ClassNotFoundException ex) {
-            System.out.println("---===Ошибка при получении Мапа===---");
-            Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        for( Entry<String, String> entry : clients.entrySet() ){
-            System.out.println("Список с сервера: " + entry.getKey() + " " + entry.getValue() );
-        }
-        //---------------
-        
-        //--- 3 recive ----
-        otvetServera = inFromServer.readLine();
-        System.out.println("Ответ сервера" + otvetServera);
-        
-        //-----------------
-        
-        clientSocket.close();
-    }
+//    public void check_svyaz() throws IOException{
+//        if(clientSocket.isClosed()){
+//            //clientSocket.connect(null);
+//            clientSocket = new Socket(InetAddress.getLocalHost(), port);
+//        }
+//        
+//        
+//        outToServer = new DataOutputStream(clientSocket.getOutputStream());
+//        inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//        //oos = new ObjectOutputStream(clientSocket.getOutputStream());// для сериализации
+//        
+//        //--- 1 send ---
+//        outToServer.writeBytes(id + '\n'); // + '\n' - обязателно 
+//        outToServer.flush();
+//        outToServer.writeBytes(name + '\n');
+//        outToServer.flush();
+//        //oos.writeObject(cld); // послать описатель
+//        //--------------
+//        
+//        //--- 2 recive --
+//        try {
+//            ois = new ObjectInputStream(clientSocket.getInputStream());
+//            
+//            clients = (TreeMap<String,String>)ois.readObject();
+//        } catch (ClassNotFoundException ex) {
+//            System.out.println("---===Ошибка при получении Мапа===---");
+//            Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        
+//        for( Entry<String, String> entry : clients.entrySet() ){
+//            System.out.println("Список с сервера: " + entry.getKey() + " " + entry.getValue() );
+//        }
+//        //---------------
+//        
+//        //--- 3 recive ----
+//        otvetServera = inFromServer.readLine();
+//        System.out.println("Ответ сервера" + otvetServera);
+//        
+//        //-----------------
+//        
+//        clientSocket.close();
+//    }
+//    
     
-    
-    public void test() throws IOException{
+    public void establishConnect() throws IOException{
         
         if(clientSocket == null)
             clientSocket = new Socket(InetAddress.getLocalHost(), port);
         
         if(oos == null)
             oos = new ObjectOutputStream(clientSocket.getOutputStream());
-        System.out.println("посылаю объект\n");
-        oos.writeObject(cld);
+        System.out.println("NetworkClien:: tпосылаю объект OperationDescriptor.op.HANDSHAKE\n");
+        oos.writeObject(new OperationDescriptor(OperationDescriptor.op.HANDSHAKE)); //поздаровкаться
+        oos.writeObject(cld); // отослать свой описатель клиента (идентификатор-имя-порт_exchange)
         oos.flush();
-        //clientSocket.close(); // здесь закрывать нельзя
         
         if(ois == null)
             ois = new ObjectInputStream(clientSocket.getInputStream());
         try {
+            
+            if(friendsList != null)friendsList = null;
             
             System.out.println("friendslist = " + 
                     (friendsList = (ArrayList<ClientDescriptor>)ois.readObject()) );
@@ -174,11 +185,94 @@ public class NetworkClient {
             Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException ex) {
+//            Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        ois.close(); oos.close(); clientSocket.close();
     }
 
     public ArrayList<ClientDescriptor> getFriendsList() {
         return friendsList;
     }
     
-    
+    private ClientDescriptor check_in_friends(String s){
+        
+        //String id = s.substring(s.indexOf(/*"client#"*/this.name),s.length());
+        String id = s.substring(this.name.length(),s.length());
+        System.out.println("id is " + id);
+        
+        for(Iterator<ClientDescriptor> it = friendsList.iterator();it.hasNext();){
+            ClientDescriptor next = it.next();
+            if(next.getMaster_id().equals(id))return next;
+        }
+        return null;
+    }    
+
+    public void exchangeData(String sVal) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ClientDescriptor cld_tmp = check_in_friends(sVal);
+        
+        if(cld_tmp != null){
+            System.out.println("-------\nreturned cld id " + cld_tmp.getMaster_id());
+            
+//            try {
+//                clientSocket = new Socket(InetAddress.getLocalHost(), port);
+//                
+//            } catch (UnknownHostException ex) {
+//                Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+//            } catch (IOException ex) {
+//                Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//            
+//            try {
+//                oos = new ObjectOutputStream(clientSocket.getOutputStream());
+//            } catch (IOException ex) {
+//                Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+            
+            
+            try {// предупреждаем сервер, что будем обмениваться с другим клиентом
+                oos.writeObject( new OperationDescriptor(OperationDescriptor.op.EXCHANGE));
+                oos.flush();
+            } catch (IOException ex) {
+                System.out.println("Exchange не прошол");
+                Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            try {
+                oos.writeObject(cld_tmp);//посылаем дескриптор того с кем будет производиться обмен
+                oos.flush();
+            } catch (IOException ex) {
+                Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            try{
+                boolean result = ois.readBoolean();//ожидаем результата проверки (сервер проверяет наличие соединения с принимающей стороной)
+                System.out.println("прислан результат result: " + result);
+                if(result){
+                    //отправка листа инициатора
+                    oos.writeObject(/*habitat.lst*/habitat.get_lst_copy());
+                    oos.flush();
+                    System.out.println("лист инициатора отправлен");
+                    //приём листа респондера
+                    CopyOnWriteArrayList<BaseAI> resp_lst =  (CopyOnWriteArrayList<BaseAI>)ois.readObject();
+                    System.out.println("лист респондера принят");
+                    habitat.update_lst(resp_lst);
+                    System.out.println("собственный лист обновлён");
+                }else{
+                    System.out.println("точка для обмена отсутствует");
+                }
+            }catch(IOException e){
+                System.out.println("yedjn "+ e);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            
+            
+            
+        }
+    }
 }

@@ -11,13 +11,16 @@ import java.io.Serializable;
  *
  * @author iUser
  */
-public class ClientDescriptor implements Serializable{ //класс для обмена с сервером
+public class ClientDescriptor implements Serializable, Comparable { //класс для обмена с сервером
 
-        private String master_id,master_name;
+        private final String master_id;
+        private final String master_name;
+        private final int wellcome_listen_port;
         
-        public ClientDescriptor(String id,String name) {
+        public ClientDescriptor(String id,String name,int wellcome_listen_port) {
             this.master_id = id;
             this.master_name = name;
+            this.wellcome_listen_port = wellcome_listen_port;
         }
 
         public String getMaster_id() {
@@ -28,13 +31,23 @@ public class ClientDescriptor implements Serializable{ //класс для обмена с серв
             return master_name;
         } 
 
-        public void setMaster_id(String master_id) {
-            this.master_id = master_id;
+        public int getWellcome_listen_port() {
+            return wellcome_listen_port;
         }
 
-        public void setMaster_name(String master_name) {
-            this.master_name = master_name;
+        
+        
+    @Override
+    public int compareTo(Object o) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if(Long.getLong(this.master_id) == Long.getLong(((ClientDescriptor)o).getMaster_id())){
+            return 0;
+        }else if(Long.getLong(this.master_id) > Long.getLong(((ClientDescriptor)o).getMaster_id())){
+            return 1;
+        }else{
+            return -1;
         }
+    }
         
     }
     
