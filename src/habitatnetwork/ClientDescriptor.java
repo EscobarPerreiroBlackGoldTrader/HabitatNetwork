@@ -40,9 +40,10 @@ public class ClientDescriptor implements Serializable, Comparable { //класс для 
     @Override
     public int compareTo(Object o) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        if(Long.getLong(this.master_id) == Long.getLong(((ClientDescriptor)o).getMaster_id())){
+        
+        if( Long.parseLong(this.master_id) == Long.parseLong(((ClientDescriptor)o).getMaster_id()) ){
             return 0;
-        }else if(Long.getLong(this.master_id) > Long.getLong(((ClientDescriptor)o).getMaster_id())){
+        }else if(Long.parseLong(this.master_id) > Long.parseLong(((ClientDescriptor)o).getMaster_id())){
             return 1;
         }else{
             return -1;

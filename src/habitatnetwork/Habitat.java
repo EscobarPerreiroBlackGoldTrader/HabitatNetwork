@@ -198,7 +198,6 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
         private boolean m_firstRun = true; // первый ли запуск метода run()?
         private long m_startTime = 0; // врем€ начала 
         private long m_lastTime = 0;  // врем€ последнего обновлени€
-        //private boolean force_seted_Time = false;
         private long pauseShift = 0;
         private long pauseBeg = 0;
         private boolean paused = false;
@@ -252,7 +251,6 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
             this.m_startTime = atTime;
             m_lastTime = m_startTime;
             m_firstRun = false; // инициализацию начала отсчЄта
-            //force_seted_Time = true;
         }
         
         public void pauseBeg(){
@@ -285,13 +283,6 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
                  //врем€ прошедшее от начала, в секундах.
                  double elapsed = ((currentTime - m_startTime)- pauseShift) / 1000.0; // pauseShift dont work properly
                  
-//                 System.out.println( "pauseShift = " + pauseShift);
-//                 System.out.println( "¬ычтенное = " + ((currentTime - m_startTime) - pauseShift) );
-//                 System.out.println( "Ѕез вычета = " + ((currentTime - m_startTime)) );
-                 
-                 //врем€ прошедшее от последнего обновлени€, в секундах.
-                 //double frameTime = (m_lastTime - m_startTime) / 1000.0;
-             
                  //вызываем обновление
                  m_aplet.Update(elapsed/*, frameTime*/);
                  

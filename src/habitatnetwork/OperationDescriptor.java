@@ -13,8 +13,8 @@ import java.io.Serializable;
  */
 public class OperationDescriptor implements Serializable{
     
-    public static enum op {HANDSHAKE,EXCHANGE};
-    private op opcode;
+    public static enum op {HANDSHAKE,EXCHANGE,GET_FRIENDS_LIST,BYE};
+    private final op opcode;
 
     public OperationDescriptor(op opcode) {
         this.opcode = opcode;

@@ -9,9 +9,9 @@ import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
@@ -22,6 +22,8 @@ import java.util.logging.Logger;
  * @author iUser
  */
 public class NetworkClient {
+    private MainJFrame mother;
+    
     //------------------ необходимая часть для отправки lst по внешнему требованию -----
     private int wellcome_listen_port; //= 21288; -необходим динамический номер порта
     //private ServerSocket inbound_wellcome_listener;
@@ -47,6 +49,70 @@ public class NetworkClient {
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
     
+    //*********************************************
+    private Updater friendsListUpdater; //обновляет список клиентов с сервера, с заданным интервалом
+    private Timer timer_FLU;
+    private long period; // частота обновления листа
+    private boolean timerStarted = false;
+
+    
+
+    
+    //**************************************************************************
+    private class Updater extends TimerTask {
+
+        private NetworkClient mother;
+
+        public Updater(NetworkClient mother) {
+            this.mother = mother;
+        }
+
+        
+        @Override
+        public void run() {
+            System.out.println("Начинаю операцию downloadFriendsList()");
+            mother.downloadFriendsList();
+        }
+        
+    }
+    //**************************************************************************
+    private synchronized void downloadFriendsList(){
+        
+        try {
+            oos.writeObject(new OperationDescriptor(OperationDescriptor.op.GET_FRIENDS_LIST));
+            System.out.println("описатель GET_FRIENDS_LIST отправлен");
+            oos.flush();
+            
+            ArrayList<ClientDescriptor> friends_list = (ArrayList<ClientDescriptor>)ois.readObject();
+            System.out.println("friends_list получен");
+            
+            mother.renewFriendsList(friends_list, cld);//корявость, но по другому нельзя
+            
+            
+        }catch (IOException ex) {
+            System.out.println("IOException - обновление листа провалилось");
+            Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            System.out.println("ClassNotFoundException - при чтении ответа от сервера (френдлист)");
+            Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+
+    private void InitTimer() {
+        if(timerStarted)return;
+        timer_FLU.schedule(friendsListUpdater,0, period); //period по умолчанию 5 сек.
+        //timer_FLU.
+        timerStarted = true;
+    }
+//    private void setPeriodRenewFriendsList(){
+//        
+//    }
+    
+    public void setPeriod(int period) {
+        this.period = period;
+    }
+    //**************************************************************************
     // обязательно должен быть public, иначе HabitatServer его не видит
 //    public class ClientDescriptor1 implements Serializable{ //класс для обмена с сервером
 //
@@ -78,7 +144,8 @@ public class NetworkClient {
     
     
     
-    public NetworkClient(int port,String hostname,InputStream in, String name,Habitat habitat) throws IOException {
+    public NetworkClient(int port,String hostname,InputStream in, String name,Habitat habitat,MainJFrame mother) throws IOException {
+        this.mother = mother;
         this.habitat = habitat;
         this.port = port;
         this.name = name;
@@ -108,6 +175,12 @@ public class NetworkClient {
         this.sp.start(); //???
         this.wellcome_listen_port = this.sp.getWellcomePort(); //узнать на каком порту запустился прослушивальщик(принимающий exchange)
         this.cld = new ClientDescriptor(id, name,this.wellcome_listen_port);
+        
+        //timer
+        timer_FLU = new Timer();
+        friendsListUpdater = new Updater(this);
+        this.period = 5000;
+        
     }
     
 //    public NetworkClient() throws IOException{
@@ -159,8 +232,12 @@ public class NetworkClient {
 //    }
 //    
     
-    public void establishConnect() throws IOException{
-        
+    
+    public ClientDescriptor getCld(){
+        return cld;
+    }
+
+    public void establishConnect() throws IOException {
         if(clientSocket == null)
             clientSocket = new Socket(InetAddress.getLocalHost(), port);
         
@@ -191,6 +268,7 @@ public class NetworkClient {
 //            Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //        ois.close(); oos.close(); clientSocket.close();
+        InitTimer();
     }
 
     public ArrayList<ClientDescriptor> getFriendsList() {
@@ -275,4 +353,26 @@ public class NetworkClient {
             
         }
     }
+
+//    @Override
+//    protected void finalize() throws Throwable {
+//        super.finalize(); //To change body of generated methods, choose Tools | Templates.
+//        System.out.println("finalize");
+//        disconnectProperly();
+//    }
+
+    private void disconnectProperly() {
+        try {
+            //    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            oos.writeObject(new OperationDescriptor(OperationDescriptor.op.BYE));
+            oos.writeObject(cld);
+            oos.flush();
+            System.out.println("ЗАКРЫВАЮ СОКЕТ");
+            oos.close();
+            
+            
+        } catch (IOException ex) {
+            Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }    
 }
