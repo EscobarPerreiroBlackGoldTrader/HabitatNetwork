@@ -22,7 +22,6 @@ public abstract class BaseAI implements IBehaviour/*, Runnable*/, Serializable {
      * при попытке сериализации lst
      * Следует исключить этуссылку!
      */
-    ///*transient*/ Thread t; 
     
     /*private*/ int speed;
     
@@ -30,6 +29,7 @@ public abstract class BaseAI implements IBehaviour/*, Runnable*/, Serializable {
     /**
      *проверить на исключения сериализации
      */
+    
     transient Habitat parent; 
     
     public BaseAI(Habitat parrentObj){ // конструктор

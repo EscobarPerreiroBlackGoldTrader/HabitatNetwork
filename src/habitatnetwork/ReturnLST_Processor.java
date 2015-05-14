@@ -22,8 +22,8 @@ class ReturnLST_Processor extends Thread{
     private Socket conn;
     private Habitat habitat;
     
-    ObjectOutputStream oos;
-    ObjectInputStream ois;
+    private ObjectOutputStream oos;
+    private ObjectInputStream ois;
 
     ReturnLST_Processor(Socket conn, Habitat habitat) {
         
@@ -44,10 +44,10 @@ class ReturnLST_Processor extends Thread{
         }
         
         ///  начинается обмен ///
-        System.out.println("ReturnLST_Processor::run()  формирую листы");
+        System.out.println("ReturnLST_Processor::run()  формирую лист");
         CopyOnWriteArrayList<BaseAI> income_lst = null;
         CopyOnWriteArrayList<BaseAI> lst = habitat.get_lst_copy();
-        System.out.println("ReturnLST_Processor::run()  листы готовы");
+        System.out.println("ReturnLST_Processor::run()  лист готов");
         try {
             //получаем lst от инициатора
             income_lst = (CopyOnWriteArrayList<BaseAI>)ois.readObject();

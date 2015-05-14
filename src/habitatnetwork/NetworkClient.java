@@ -30,8 +30,8 @@ public class NetworkClient {
     private ServerPart sp;
     //----------------------------------------------------------------------------------
 
-    private String otvetServera;
-    private TreeMap<String,String> clients;
+   // private String otvetServera;
+   // private TreeMap<String,String> clients;
     private ArrayList<ClientDescriptor> friendsList;
     //---------------------
     private final ClientDescriptor cld;
@@ -50,8 +50,8 @@ public class NetworkClient {
     private ObjectInputStream ois;
     
     //*********************************************
-    private Updater friendsListUpdater; //обновляет список клиентов с сервера, с заданным интервалом
-    private Timer timer_FLU;
+    private final Updater friendsListUpdater; //обновляет список клиентов с сервера, с заданным интервалом
+    private final Timer timer_FLU;
     private long period; // частота обновления листа
     private boolean timerStarted = false;
 
@@ -61,7 +61,7 @@ public class NetworkClient {
     //**************************************************************************
     private class Updater extends TimerTask {
 
-        private NetworkClient mother;
+        private final NetworkClient mother;
 
         public Updater(NetworkClient mother) {
             this.mother = mother;
@@ -79,19 +79,34 @@ public class NetworkClient {
     private synchronized void downloadFriendsList(){
         
         try {
-            oos.writeObject(new OperationDescriptor(OperationDescriptor.op.GET_FRIENDS_LIST));
-            System.out.println("описатель GET_FRIENDS_LIST отправлен");
-            oos.flush();
-            
-            ArrayList<ClientDescriptor> friends_list = (ArrayList<ClientDescriptor>)ois.readObject();
-            System.out.println("friends_list получен");
-            
-            mother.renewFriendsList(friends_list, cld);//корявость, но по другому нельзя
-            
+            if(clientSocket != null && ois != null && oos != null){
+                oos.writeObject(new OperationDescriptor(OperationDescriptor.op.GET_FRIENDS_LIST));
+                System.out.println("описатель GET_FRIENDS_LIST отправлен");
+                oos.flush();
+
+                ArrayList<ClientDescriptor> friends_list = (ArrayList<ClientDescriptor>)ois.readObject();
+                System.out.println("friends_list получен");
+
+                mother.renewFriendsList(friends_list, cld);//корявость, но по другому нельзя
+            }else{
+                establishConnect();
+            }
             
         }catch (IOException ex) {
+            
+            System.out.println("******************* ОБРАБОТАНО ***********************");
             System.out.println("IOException - обновление листа провалилось");
+            
             Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
+            
+            mother.setInfo_ConnectLost();
+            oos = null;
+            ois = null;
+            clientSocket = null; 
+            System.out.println("clientSocket = " + clientSocket + "\n" +
+                    "oos = " + oos + "\n" + 
+                    "ois = " + ois);
+            System.out.println("******************************************************");
         } catch (ClassNotFoundException ex) {
             System.out.println("ClassNotFoundException - при чтении ответа от сервера (френдлист)");
             Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
@@ -150,7 +165,7 @@ public class NetworkClient {
         this.port = port;
         this.name = name;
         this.id = String.valueOf((new Random()).nextLong());
-        /*this.cld = new NetworkClient.ClientDescriptor1(id, this.name);*/
+        
         //this.inFromUser = new BufferedReader(new InputStreamReader(/*System.in*/in));
         //in.read(id)
         //this.packet = inFromUser.readLine();
@@ -262,12 +277,7 @@ public class NetworkClient {
             Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException ex) {
-//            Logger.getLogger(NetworkClient.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        ois.close(); oos.close(); clientSocket.close();
+        mother.setInfo_ConnectEstablished();
         InitTimer();
     }
 
@@ -354,12 +364,6 @@ public class NetworkClient {
         }
     }
 
-//    @Override
-//    protected void finalize() throws Throwable {
-//        super.finalize(); //To change body of generated methods, choose Tools | Templates.
-//        System.out.println("finalize");
-//        disconnectProperly();
-//    }
 
     private void disconnectProperly() {
         try {

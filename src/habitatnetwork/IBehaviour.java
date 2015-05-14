@@ -17,12 +17,4 @@ public interface IBehaviour {
      * @return 
      */
     String Beep();
-
-//    boolean setPic(BufferedImage pic);
-//    
-//    BufferedImage getPic();
-    
-    
-    
-
 }

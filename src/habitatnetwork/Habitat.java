@@ -12,11 +12,10 @@ import java.awt.image.BufferedImage;
 import static java.awt.image.ImageObserver.ALLBITS;
 import java.io.IOException;
 import java.io.PipedWriter;
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CopyOnWriteArrayList; // !!
+import java.util.concurrent.CopyOnWriteArrayList; 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -28,12 +27,11 @@ import javax.swing.event.MouseInputAdapter;
  *
  * @author iUser
  */
-public class Habitat extends /*JApplet*/JPanel  implements Serializable {
+public class Habitat extends /*JApplet*/JPanel  /*implements Serializable*/ {
     private Timer m_timer = new Timer(); //private javax.swing.Timer swTimer ;//= new javax.swing.Timer();
     //private Timer gUpd_timer = new Timer(); // вызывает обновление "холста"
     private Updater m_updater; 
-//    private gUpdater gUpd_updater; 
-    //int counter=0;
+
     
     
     CarMan /*Thread*/ ThreadCarManager;
@@ -41,10 +39,6 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
     
     ExecutorService execCars; 
     ExecutorService execMoto;
-    
-    
-//    ThreadGroup groupMoto;
-//    ThreadGroup groupCar;
     
     private boolean pausedMoto = false;
     private boolean pausedCar = false;
@@ -67,7 +61,7 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
     
     
     
-    private boolean m_runViaFrame = false; 
+    
     private double m_time = 0;
     private double p1 = 0.20; // вероятность появления мотоцикла
     private double p2 = 0.30; // вероятность появления машины
@@ -120,19 +114,6 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
     
     final int CLOCK_RATE = 42; // частота перерисовки экрана (задержка в милисекундах)
     
-    //double totalTime = 0.0;
-    
-    // редактировать при изменения пути к картинкам
-//    private final String moto_path = "images/motopic.png";  
-//    private final String car_path = "images/carpic.png";
-//    
-//    private final URL motoURL = Habitat.class.getResource(moto_path);
-//    private final URL carURL = Habitat.class.getResource(car_path);
-//    
-//    private final ImageIcon motoico = new ImageIcon(motoURL);
-//    private final ImageIcon carico = new ImageIcon(carURL);
-    
-    //BufferedImage mot = null;
     BufferedImage motopic = null;
     BufferedImage carpic = null; 
     Image offScreenImage = null;
@@ -149,7 +130,6 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
     private void initComponents() {
 
         layout = new javax.swing.GroupLayout(this);
-        //////////////////MyGroupLayout layout = new MyGroupLayout(this); //сделано для возможности сериализации
         this.setLayout(layout);
         GroupLayout.ParallelGroup pg = layout.createParallelGroup();
         layout.setHorizontalGroup(
@@ -162,15 +142,9 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
         );
         
         
-    }// </editor-fold>   
+    } 
 //==============================================================================
     void setMotoPriority(int prior) {
-//        for(Iterator<BaseAI> it = lst.iterator();it.hasNext();){
-//            BaseAI next = it.next();
-//            if(next instanceof Moto){
-//                ((Moto)next).t.setPriority(prior);
-//            }
-//        }
         ThreadMotoManager.setPriority(prior);
     }
 //==============================================================================
@@ -188,9 +162,14 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
     }
 //==============================================================================
     synchronized void update_lst(CopyOnWriteArrayList<BaseAI> income_lst) {
+        // и ещё надо обновить счётчики 
         for(BaseAI item: income_lst){
             lst.add(item);
+            vel_count++;
+            if(item instanceof Car)car_count++;
+            if(item instanceof Moto)moto_count++;
         }
+        repaint();
     }
 //==============================================================================
     private class Updater extends TimerTask /*implements Serializable*/{
@@ -302,16 +281,7 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
         
         execCars = Executors.newCachedThreadPool();
         execMoto = Executors.newCachedThreadPool();
-        
-        //execMoto = Executors.newScheduledThreadPool(5000);
-//        groupCar = new ThreadGroup("Cars");
-//        groupMoto = new ThreadGroup("Motos");
-        
-//        try{
-//            mot = ImageIO.read(new File("./motopic.png"));
-//        }catch(IOException e){
-//            e.printStackTrace();
-//        }
+
           try{
               motopic = ImageIO.read(getClass().getResource("motopic.png"));
           }catch(IOException e){
@@ -355,24 +325,14 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
             
             switch(keycode){
                 case KeyEvent.VK_B: // запустить симуляцию
-                    /*System.out.println("B is pressed");*/
-                    /*emul_progress = true;*/
-                    /*repaint();*/
                     start_sim();
                     break;
                 case KeyEvent.VK_E: //остановить симуляцию
-                    /*System.out.println("E is pressed");
-                    emul_progress = false;
-                    vel_shown = 0;
-                    vel_count = 0;
-                    lst.clear();
-                    repaint();*/
+                    
                     stop_sim();
                     break;
                 case KeyEvent.VK_T:
-                    /*System.out.println("T is pressed");
-                    showtime = !showtime;
-                    repaint();*/
+                    
                     trig_timer();
                     break;
             }
@@ -471,15 +431,6 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
         car_count = 0;
         moto_count = 0;
         
-        //ListIterator<BaseAI> l_iter = lst.listIterator(/*vel_shown*/0);
-        
-//        int i = 1;
-//        for(BaseAI ob: lst){
-//            System.out.println("Stopped thread №" + i);
-//            ob.going = false;
-//            ++i;
-//        }
-        
         //два потока управления машинами и мотоциклами
         
         //ThreadCarManager.workDone();
@@ -567,24 +518,12 @@ public class Habitat extends /*JApplet*/JPanel  implements Serializable {
     }
 //==============================================================================   
 synchronized void unfreezeMoto(){
-//        for(Iterator<BaseAI> it = lst.iterator();it.hasNext();){
-//            BaseAI next = it.next();
-//            if(next instanceof Moto){
-//                ((Moto)next).unfreeze();
-//            }
-//        }
     
     ((MotoMan)ThreadMotoManager).unfreeze();
     
 }
 //==============================================================================   
 synchronized void unfreezeCar(){
-//        for(Iterator<BaseAI> it = lst.iterator();it.hasNext();){
-//            BaseAI next = it.next();
-//            if(next instanceof Car){
-//                ((Car)next).unfreeze();
-//            }
-//        }
     
     ((CarMan)ThreadCarManager).unfreeze();
 }
@@ -606,25 +545,14 @@ synchronized void unfreezeCar(){
         m_updater = new Updater(this);
         
         m_timer.schedule(m_updater, 0, period/*100*/);
-     
-//        gUpd_updater = new gUpdater(this);
-//        Thread tr = new Thread(gUpd_updater);
-//        tr.setDaemon(true);
-//        tr.start();
-        
-        //gUpd_timer.schedule(gUpd_updater, 10);
-        
-        //String param = getParameter(PARAM_string_1);
-        
+
     }
 //==============================================================================    
     public void Update(double elapsedTime/*, double frameTime*/){
        if(emul_progress){
            m_time = elapsedTime;
        }else{
-//           m_timer.
-           //m_time = 0; // 
-           //m_updater.drop();
+
        }
        
        if(emul_progress){
@@ -636,22 +564,12 @@ synchronized void unfreezeCar(){
                //if(!m.setPic(motopic)) System.err.println("motoico missed");
                m.setX( (int)((getWidth()/1.2) * Math.random()) );
                m.setY( (int)((getHeight()/1.2) * Math.random()) ); 
-               
-               /**
-                * Необходимо переделать, сделать два потока, 
-                * один для всех мотоциклов и один для всех машин
-                */
-               //m.t = new Thread(groupMoto,m); // создание потока и добавление его в группу Motos
-               
-               //m.t.start();
-               
+
                lst.add(m);
-               
-            //  445454 execMoto.execute(m); // убрать
                
                ++vel_count;
                ++moto_count;
-               //repaint();
+               
            }
            
            if(p0 <= p2){ // появилась машина
@@ -661,20 +579,11 @@ synchronized void unfreezeCar(){
                c.setX( (int)((getWidth()/1.2) * Math.random()) );
                c.setY( (int)((getHeight()/1.2) *Math.random()) );
                
-               /**
-                * Необходимо переделать, сделать два потока, 
-                * один для всех мотоциклов и один для всех машин
-                */
-               //c.t = new Thread(groupCar,c); // создание потока и добавление его в группу Cars
-               //c.t.start();// запуск в новом потоке
-               
                lst.add(c);
-            //  787999 execCars.execute(c); //убрать
-               
-               
+            
                ++vel_count;
                ++car_count;
-               //repaint();
+               
            }    
        }
        
@@ -702,9 +611,6 @@ synchronized void unfreezeCar(){
         String str = "Time = " + Double.toString(m_time); //получение времени по таймеру
         
         if(showtime)offScreenGraphics.drawString(str, 395, getHeight()-10); // отображение таймера        
-        //if(vel_count > vel_shown){ //если сгенерировался новый транспорт
-        //synchronized(lst){ // синхронизация обращения к листу (исключение наложения обращений)
-        //Iterator<Velocity> iterator = lst.iterator();
         
         for(Iterator<BaseAI> it = lst.iterator();it.hasNext();){
             BaseAI next = it.next();
@@ -718,25 +624,7 @@ synchronized void unfreezeCar(){
             
             offScreenGraphics.drawImage(img,next.getX(),next.getY(),this);
         }
-                
-//--------------------------------  цикл с выборкой ссылки на картинку из хранимых объектов ---------                        
-//                ListIterator<BaseAI> l_it = lst.listIterator(/*vel_shown*/0);
-//                for(int i=0/*vel_shown*/;l_it.hasNext();++i,l_it.next() ,vel_shown = i){
-//                    //Class<? extends Velocity> s = lst.get(i).getClass();      
-//                    //g.drawString(s.getTypeName(), 50 + 10*i, 50);
-//                    //g.drawString("step {i}", 200 + 10*1, 50 + 20*i);
-//                    //  g.drawString(lst.get(i).Beep(),75,50+ i*10);
-//                    
-//                    offScreenGraphics.drawImage(lst.get(i).getPic(),
-//                            /*(int)((getWidth()/1.2) * Math.random())*/ lst.get(i).getX(),
-//                            /*(int)((getHeight()/1.2) *Math.random()) */lst.get(i).getY(),
-//                            this);
-//                }
-//-----------------------------------------------------------------------------------------------------
-            //}
-        //}        
-        //offScreenGraphics.drawString("showtime = " + showtime, 100, 100);
-        //offScreenGraphics.drawString("emul_progress = " + emul_progress, 120, 120);
+
         offScreenGraphics.setColor(Color.red);
         offScreenGraphics.setFont(new Font("Arial",Font.BOLD,14));
         offScreenGraphics.drawString("vel_count = " + vel_count, 10, getHeight()-10);
@@ -754,48 +642,13 @@ synchronized void unfreezeCar(){
         
         //--------
         
-    }
-    
-//==============================================================================    
-//    /**
-//     * @param args the command line arguments
-//     */
-//    public static void main(String[] args) {
-//        
-//        JFrame frame = new JFrame();
-//        
-//        
-//        Habitat app = new Habitat();
-//        //app.init(); 
-//        app.start();
-//        
-//        
-//        frame.getContentPane().add(app);
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        frame.setSize(800,600);
-//        frame.setVisible(true);
-//    
-//    }
-   
-   
+    }    
+
 private PipedWriter pw = new PipedWriter();
-
-
-//private PipedReader pr_income_form_console;
-
 
     public PipedWriter getWr_Stream() {
         return pw;
-    }    
-    
-//    public void initPW(PipedWriter pw){
-//        try {
-//            this.pr_income_form_console = new PipedReader(pw);
-//        } catch (IOException ex) {
-//            Logger.getLogger(jMyTextArea.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
-    
+    }
     
     public void write_to_console(String s){
         if(s == null){
@@ -837,33 +690,4 @@ private PipedWriter pw = new PipedWriter();
             moto_count = new_mc;
         }
     }
-    
-////==============================================================================
-////метод для определения тех объектов которые будут сериализованы и записаны в поток
-//private void writeObject(ObjectOutputStream oos) throws IOException {
-//    
-//    //oos.writeObject(lst);
-//    System.out.println("Началась сериализация");
-//    oos.write(vel_count);
-//    
-//}
-//
-//private void readObject(ObjectInputStream ois) throws IOException, FileNotFoundException {
-//    
-////        try {
-//            //lst = ((CopyOnWriteArrayList<BaseAI>)ois.readObject());
-//            
-//            vel_count = (int)ois.readInt();
-//            System.out.println(" ila-la-lala-lay: " + vel_count);
-//            
-////        } catch (ClassNotFoundException ex) {
-////            Logger.getLogger(Habitat.class.getName()).log(Level.SEVERE, null, ex);
-////        }
-//    
-//}
-
-}// end
-//==============================================================================
-
-
-
+}

@@ -25,7 +25,7 @@ public class ServerPart extends Thread{
 //        this.port = wellcome_listen_port;
         this.habitat = habitat;
         try {
-            wellcome = new ServerSocket(/*port*/0);                   //!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            wellcome = new ServerSocket(/*port*/0);
             System.out.println("ServerPart:: wellcome создан: " + wellcome);
             this.wellcome_listen_port = wellcome.getLocalPort();
             System.out.println("ServerPart:: wellcome_listen_port is: " + wellcome_listen_port);

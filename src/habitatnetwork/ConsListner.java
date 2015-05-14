@@ -9,7 +9,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.PipedReader;
 import java.io.PipedWriter;
-import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,8 +37,8 @@ public class ConsListner extends Thread {
     }
     
     private char[] cbuf = new char[80];
-    
-    private DataInputStream dis = new DataInputStream(null);
+//    
+//    private DataInputStream dis = new DataInputStream(null);
     
     @Override
     public void run(){

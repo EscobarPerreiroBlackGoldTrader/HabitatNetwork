@@ -5,7 +5,6 @@
  */
 package habitatnetwork;
 
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
